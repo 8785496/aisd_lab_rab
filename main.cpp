@@ -1,7 +1,17 @@
+//main.cpp
 #include <iostream>
 #include "HashTable.h"
 
 using namespace std;
+
+void printTable(HashTable<float> &table)
+{
+	for (auto item : table)
+	{
+		cout << item << " ";
+	}
+	cout << endl;
+}
 
 int main()
 {
@@ -14,18 +24,12 @@ int main()
     cout << "  4 - добавить новый элемент" << endl;
     cout << "  5 - удалить элемент" << endl;
     cout << "  6 - найти элемент" << endl;
-    cout << "  7 - количество проб" << endl << endl;
+	cout << "  7 - количество проб" << endl;
+	cout << "  8 - вывести структуру таблицы" << endl;
+	cout << "  9 - вывести таблицу" << endl;
+	cout << " 10 - очистка таблицы" << endl << endl;
 
-    HashTable<float> table(10);
-
-	auto it = table.begin();
-	auto res = *it;
-	cout << res << endl;
-
-	int a;
-	cin >> a;
-	return 0;
-
+    HashTable<float> table(3);
     while (true)
     {
         cout << "¬ведите команду: ";
@@ -42,6 +46,7 @@ int main()
                 break;
             case 3:
                 cout << table.getFree() << endl;
+				break;
             case 4:
                 cout << "¬ставка. ¬ведите число в диапазоне -10000..10000" << endl;
                 cin >> f;
@@ -55,8 +60,20 @@ int main()
             case 6:
                 cout << "ѕоиск. ¬ведите число в диапазоне -10000..10000" << endl;
                 cin >> f;
-                table.del(f);
+                cout << (table.search(f) ? "Ёлемент найден" : "Ёлемент не найден") << endl;
                 break;
+			case 7:
+				cout << table.getCountIteration() << endl;
+				break;
+			case 8:
+				table.print();
+				break;
+			case 9:
+				printTable(table);
+				break;
+			case 10:
+				table.clear();
+				break;
             case 0:
                 return 0;
             default:

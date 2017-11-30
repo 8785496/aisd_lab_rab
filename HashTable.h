@@ -1,6 +1,8 @@
+//HashTable.h
 #ifndef AISD_LAB_RAB_HASHTABLE_H
 #define AISD_LAB_RAB_HASHTABLE_H
 
+#include <iostream>
 #include "List.h"
 
 template <typename T> class HashTable
@@ -20,27 +22,33 @@ private:
 public:
 	class iterator
 	{
-		List<T> *currentHead;
+		List<T> **currentHead;
 		List<T> *currentItem;
 	public:
-		iterator(List<T> *begin)
+		iterator(List<T> **head)
 		{
-			this->currentHead = begin;
-			this->currentItem = begin;
+			currentHead = head;
+			//std::cout << "iterator constructor: " << currentHead << std::endl;
 		}
 		iterator& operator++()
 		{
-			if (this->currentItem->next == nullptr)
-			{
-				while (this->currentHead == nullptr)
-				{
-					this->currentHead++;
-				}
-			}
+			currentHead++;
+			//std::cout << "operator++: " << currentHead << std::endl;
+			return *this;
+			//if (this->currentItem->next == nullptr)
+			//{
+			//	while (this->currentHead == nullptr)
+			//	{
+			//		this->currentHead++;
+			//	}
+			//}
 		}
+		//iterator(const iterator& mit) : iterator(mit.currentHead) {}
+		bool operator!=(const iterator& rhs) const { return currentHead != rhs.currentHead; }
+		bool operator==(const iterator& rhs) const { return currentHead == rhs.currentHead; }
 		T operator*() 
 		{ 
-			return 5.1; 
+			return 5.1f; 
 		}
 	};
 
@@ -52,13 +60,14 @@ public:
         }
         this->size = size;
         this->count = 0;
+		this->countIteration = 0;
     };
     ~HashTable()
     {
         for (int i = 0; i < size; ++i) {
             delete data[i];
         }
-        delete data;
+        delete [] data;
     };
     int getSize()
     {
@@ -80,52 +89,90 @@ public:
     };
     int getFree()
     {
-        return 0;
+		int count = 0;
+		for (int i = 0; i < size; i++)
+		{
+			if (data[i] == nullptr)
+			{
+				count++;
+			}
+		}
+		return count;
     };
     void clear()
     {
-        for (int i = 0; i < size; ++i) {
+        for (int i = 0; i < size; i++) {
             delete data[i];
+			data[i] = nullptr;
         }
-        size = 0;
         count = 0;
     };
     bool search(T &key)
     {
-        return false;
+		int i = hash(key);
+		countIteration = 1;
+		if (data[i] != nullptr)
+		{
+			List<T> *node = data[i];
+			while (node != nullptr)
+			{
+				if (node->value == key)
+				{
+					return true;
+				}
+				node = node->next;
+				countIteration++;
+			}
+		}
+		return false;
     };
     void insert(T &key)
     {
         int i = hash(key);
+		countIteration = 1;
         if (data[i] == nullptr) {
             data[i] = new List<T>(key);
         }
         else {
-            List<T> *head = data[i];
-            while (head->next != nullptr) {
-                if (head->value == key) {
+            List<T> *item = data[i];
+            do {
+                if (item->value == key) {
                     return;
                 }
-                head = head->next;
-            }
-            head = new List<T>(key);
+                item = item->next == nullptr ? item : item->next;
+				countIteration++;
+			} while (item->next != nullptr);
+            item->next = new List<T>(key);
         }
     };
     void del(T &key)
     {
         int i = hash(key);
+		countIteration = 1;
         if (data[i] == nullptr) {
-            data[i] = new List<T>(key);
+			return;
         }
-        else {
-            List<T> *head = data[i];
-            while (head->next != nullptr) {
-                if (head->value == key) {
-                    return;
-                }
-                head = head->next;
+		List<T> *item = data[i];
+		List<T> *prev = nullptr;
+        while (item != nullptr) {
+            if (item->value == key) {
+				if (prev == nullptr)
+				{
+					data[i] = item->next;
+					item->next = nullptr;
+					delete item;
+				}
+				else
+				{
+					prev->next = item->next;
+					item->next = nullptr;
+					delete item;
+				}
+				return;
             }
-            head = new List<T>(key);
+			prev = item;
+            item = item->next;
+			countIteration++;
         }
     };
     int getCountIteration()
@@ -135,17 +182,34 @@ public:
 
 	iterator begin()
 	{
-		//
-		iterator res(this->data[0]);
-		return res;
+		return iterator(&data[0]);
 	}
-	iterator& end()
+	iterator end()
 	{
-		//
-		return new iterator();
+		return iterator(&data[size]);
 	}
 	
-
+	void print()
+	{
+		for (int i = 0; i < size; i++)
+		{
+			if (data[i] != nullptr)
+			{
+				std::cout << "[" << i << "] ";
+				List<T> *list = data[i];
+				while (list != nullptr)
+				{
+					std::cout << list->value << " -> ";
+					list = list->next;
+				}
+				std::cout << "null" << std::endl;
+			}
+			else
+			{
+				std::cout << "[" << i << "] null" << std::endl;
+			}
+		}
+	}
 };
 
 #endif //AISD_LAB_RAB_HASHTABLE_H
