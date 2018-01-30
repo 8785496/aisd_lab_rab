@@ -1,10 +1,11 @@
 //main.cpp
 #include <iostream>
+#include <string>
 #include "HashTable.h"
 
 using namespace std;
 
-void printTable(HashTable<float> &table)
+void printTable(HashTable<float, int> &table)
 {
 	for (auto item : table)
 	{
@@ -27,15 +28,16 @@ int main()
 	cout << "  7 - количество проб" << endl;
 	cout << "  8 - вывести структуру таблицы" << endl;
 	cout << "  9 - вывести таблицу" << endl;
-	cout << " 10 - очистка таблицы" << endl << endl;
+	cout << " 10 - очистка таблицы" << endl;
+	cout << " 11 - заполнить таблицу тестовыми данными" << endl << endl;
 
-    HashTable<float> table(3);
+    HashTable<float, int> table(10);
+    float key;
+	int value, command;
     while (true)
     {
-        cout << "Введите команду: ";
-        int command;
+        cout << ">> ";
         cin >> command;
-        float f;
         switch (command)
         {
             case 1:
@@ -48,19 +50,21 @@ int main()
                 cout << table.getFree() << endl;
 				break;
             case 4:
-                cout << "Вставка. Введите число в диапазоне -10000..10000" << endl;
-                cin >> f;
-                table.insert(f);
+				cout << "Вставка. Введите ключ [-10000.00, 10000.00]: ";
+                cin >> key;
+				cout << "Введите значение (int): ";
+				cin >> value;
+                cout << table.insert(key, value) << endl;
                 break;
             case 5:
-                cout << "Удаление. Введите число в диапазоне -10000.0 - 10000" << endl;
-                cin >> f;
-                table.del(f);
+                cout << "Удаление. Введите ключ [-10000.00, 10000.00]: ";
+                cin >> key;
+                cout << table.remove(key) << endl;
                 break;
             case 6:
-                cout << "Поиск. Введите число в диапазоне -10000..10000" << endl;
-                cin >> f;
-                cout << (table.search(f) ? "Элемент найден" : "Элемент не найден") << endl;
+                cout << "Поиск. Введите ключ [-10000.00, 10000.00]: ";
+                cin >> key;
+                cout << (table.search(key, value) ? to_string(value) : "Элемент не найден") << endl;
                 break;
 			case 7:
 				cout << table.getCountIteration() << endl;
@@ -73,6 +77,11 @@ int main()
 				break;
 			case 10:
 				table.clear();
+				break;
+			case 11:
+				table.insert(1.0f, 1);
+				table.insert(2.0f, 2);
+				table.insert(3.0f, 3);
 				break;
             case 0:
                 return 0;

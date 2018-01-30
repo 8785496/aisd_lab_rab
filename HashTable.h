@@ -3,58 +3,79 @@
 #define AISD_LAB_RAB_HASHTABLE_H
 
 #include <iostream>
-#include "List.h"
 
-template <typename T> class HashTable
+template <typename K, typename V> class HashTable
 {
 private:
-    List<T> **data;
+	const float ALPHA = 2.0f;
+	template <typename K, typename V> class List {
+	public:
+		K key;
+		V value;
+		List<K, V> *next;
+		List(K key, V value)
+		{
+			this->key = key;
+			this->value = value;
+			next = nullptr;
+		}
+	};
+    List<K, V> **data;
     int size;
     int count;
     int countIteration;
-    int hash(T &key)
+    int hash(K key)
     {
-        float hash = key + 10000.0f;
-        hash = hash * 0.6180339887f;
+		int intKey = int(key * 100) + 1000000;
+        float hash = intKey * 0.6180339887f;
         hash = hash - (int)hash;
         return (int)(size * hash);
     }
 public:
 	class iterator
 	{
-		List<T> **currentHead;
-		List<T> *currentItem;
+		List<K, V> **currentHead;
+		List<K, V> **endHead;
+		List<K, V> *currentItem;
 	public:
-		iterator(List<T> **head)
+		iterator(List<K, V> **head, List<K, V> **end)
 		{
 			currentHead = head;
-			//std::cout << "iterator constructor: " << currentHead << std::endl;
+			endHead = end;
+			while (*currentHead == nullptr && currentHead != endHead)
+			{
+				currentHead++;
+			}
+			currentItem = *currentHead;
 		}
 		iterator& operator++()
 		{
-			currentHead++;
-			//std::cout << "operator++: " << currentHead << std::endl;
+			if (currentItem->next != nullptr)
+			{
+				currentItem = currentItem->next;
+			}
+			else
+			{
+				currentHead++;
+				while (*currentHead == nullptr && currentHead != endHead)
+				{
+					currentHead++;
+				}
+				currentItem = *currentHead;
+			}
 			return *this;
-			//if (this->currentItem->next == nullptr)
-			//{
-			//	while (this->currentHead == nullptr)
-			//	{
-			//		this->currentHead++;
-			//	}
-			//}
 		}
-		//iterator(const iterator& mit) : iterator(mit.currentHead) {}
 		bool operator!=(const iterator& rhs) const { return currentHead != rhs.currentHead; }
 		bool operator==(const iterator& rhs) const { return currentHead == rhs.currentHead; }
-		T operator*() 
+		K operator*() 
 		{ 
-			return 5.1f; 
+			return currentItem->key;
 		}
 	};
-
-    HashTable(int size)
+    HashTable(int count)
     {
-        data = new List<T>*[size];
+		int size = (int)(count / ALPHA);
+		data = new List<K, V>*[size];
         for (int i = 0; i < size; ++i) {
             data[i] = nullptr;
         }
@@ -75,16 +96,16 @@ public:
     };
     int getCount()
     {
-        int count = 0;
-        for (int i = 0; i < size; ++i) {
-            if (data[i] != nullptr) {
-                List<T> *head = data[i];
-                while (head != nullptr) {
-                    count++;
-                    head = head->next;
-                }
-            }
-        }
+        //int count = 0;
+        //for (int i = 0; i < size; ++i) {
+        //    if (data[i] != nullptr) {
+        //        List<K> *head = data[i];
+        //        while (head != nullptr) {
+        //            count++;
+        //            head = head->next;
+        //        }
+        //    }
+        //}
         return count;
     };
     int getFree()
@@ -107,17 +128,18 @@ public:
         }
         count = 0;
     };
-    bool search(T &key)
+    bool search(K key, V &value)
     {
 		int i = hash(key);
 		countIteration = 1;
 		if (data[i] != nullptr)
 		{
-			List<T> *node = data[i];
+			List<K, V> *node = data[i];
 			while (node != nullptr)
 			{
-				if (node->value == key)
+				if (node->key == key)
 				{
+					value = node->value;
 					return true;
 				}
 				node = node->next;
@@ -126,36 +148,42 @@ public:
 		}
 		return false;
     };
-    void insert(T &key)
+    bool insert(K key, V value)
     {
         int i = hash(key);
 		countIteration = 1;
         if (data[i] == nullptr) {
-            data[i] = new List<T>(key);
+            data[i] = new List<K, V>(key, value);
+			count++;
+			return true;
         }
         else {
-            List<T> *item = data[i];
+            List<K, V> *item = data[i];
             do {
-                if (item->value == key) {
-                    return;
+                if (item->key == key) {
+                    return false;
                 }
                 item = item->next == nullptr ? item : item->next;
 				countIteration++;
 			} while (item->next != nullptr);
-            item->next = new List<T>(key);
+			item = new List<K, V>(key, value);
+			item->next = data[i];
+			data[i] = item;
+			count++;
+			return true;
         }
     };
-    void del(T &key)
+    bool remove(K key)
     {
         int i = hash(key);
 		countIteration = 1;
         if (data[i] == nullptr) {
-			return;
+			return false;
         }
-		List<T> *item = data[i];
-		List<T> *prev = nullptr;
+		List<K, V> *item = data[i];
+		List<K, V> *prev = nullptr;
         while (item != nullptr) {
-            if (item->value == key) {
+            if (item->key == key) {
 				if (prev == nullptr)
 				{
 					data[i] = item->next;
@@ -168,27 +196,27 @@ public:
 					item->next = nullptr;
 					delete item;
 				}
-				return;
+				count--;
+				return true;
             }
 			prev = item;
             item = item->next;
 			countIteration++;
         }
+		return false;
     };
     int getCountIteration()
     {
         return countIteration;
     }
-
 	iterator begin()
 	{
-		return iterator(&data[0]);
+		return iterator(&data[0], &data[size]);
 	}
 	iterator end()
 	{
-		return iterator(&data[size]);
+		return iterator(&data[size], &data[size]);
 	}
-	
 	void print()
 	{
 		for (int i = 0; i < size; i++)
@@ -196,10 +224,10 @@ public:
 			if (data[i] != nullptr)
 			{
 				std::cout << "[" << i << "] ";
-				List<T> *list = data[i];
+				List<K, V> *list = data[i];
 				while (list != nullptr)
 				{
-					std::cout << list->value << " -> ";
+					std::cout << list->key << " -> ";
 					list = list->next;
 				}
 				std::cout << "null" << std::endl;
