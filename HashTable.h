@@ -263,6 +263,27 @@ public:
 			}
 		}
 	}
+	float getKsiSqrAvg()
+	{
+		float *ksi_sqr = new float[size];
+		for (int i = 0; i < size; i++)
+		{
+			int len = 0;
+			auto node = data[i];
+			while (node != 0)
+			{
+				len++;
+				node = node->next;
+			}
+			ksi_sqr[i] = ((float)size / count) * (len - count / size);
+		}
+		float ksi_sqr_sum = 0.0;
+		for (int i = 0; i < size; i++)
+		{
+			ksi_sqr_sum += ksi_sqr[i];
+		}
+		return ksi_sqr_sum / size;
+	}
 };
 
 #endif //AISD_LAB_RAB_HASHTABLE_H

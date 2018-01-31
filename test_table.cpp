@@ -1,4 +1,4 @@
-//main.cpp
+// test_table.cpp
 #include <iostream>
 #include <string>
 #include "HashTable.h"
@@ -54,7 +54,7 @@ int main()
 		else // попадания
 		{
 			int index = rand() % k;
-			float key = keyGen() / 10000;
+			float key = keyGen();
 
 			table.remove(data[index]);
 			countRemove += table.getCountIteration();
