@@ -7,9 +7,9 @@ using namespace std;
 
 void printTable(HashTable<float, int> &table)
 {
-	for (auto item : table)
+	for (auto it = table.begin(); it != table.end(); ++it)
 	{
-		cout << item << " ";
+		cout << **it << " ";
 	}
 	cout << endl;
 }
@@ -29,11 +29,16 @@ int main()
 	cout << "  8 - вывести структуру таблицы" << endl;
 	cout << "  9 - вывести таблицу" << endl;
 	cout << " 10 - очистка таблицы" << endl;
-	cout << " 11 - заполнить таблицу тестовыми данными" << endl << endl;
+	cout << " 11 - заполнить таблицу тестовыми данными" << endl;
+	cout << " 12 - итератора начала" << endl;
+	cout << " 13 - итератор ++" << endl;
+	cout << " 14 - изменить значение через итератор" << endl << endl;
 
-    HashTable<float, int> table(10);
+    HashTable<float, int> table(20);
     float key;
 	int value, command;
+	HashTable<float, int>::iterator it;
+	//auto it = table.begin();
     while (true)
     {
         cout << ">> ";
@@ -82,6 +87,54 @@ int main()
 				table.insert(1.0f, 1);
 				table.insert(2.0f, 2);
 				table.insert(3.0f, 3);
+				break;
+			case 12:
+				try 
+				{
+					it = table.begin();
+					cout << **it << endl;
+				}
+				catch (int e)
+				{
+					if (e == HashTable<float, int>::ERROR_EMPTY_TABLE)
+					{
+						cout << "Ошибка: таблица пустая" << endl;
+					}
+				}
+				break;
+			case 13:
+				try 
+				{
+					++it;
+					cout << **it << endl;
+				}
+				catch (int e)
+				{
+					if (e == HashTable<float, int>::ERROR_INCREMENT)
+					{
+						cout << "Ошибка: ошибка икрементирования" << endl;
+					}
+					else if (e == HashTable<float, int>::ERROR_GET_VALUE)
+					{
+						cout << "Ошибка: получения значения" << endl;
+					}
+				}
+				break;
+			case 14:
+				cout << "Изменение значения по итератору. Введите новое значение: ";
+				cin >> value;
+				try
+				{
+					**it = value;
+					cout << **it << endl;
+				}
+				catch (int e)
+				{
+					if (e == HashTable<float, int>::ERROR_GET_VALUE)
+					{
+						cout << "Ошибка: получения значения" << endl;
+					}
+				}
 				break;
             case 0:
                 return 0;

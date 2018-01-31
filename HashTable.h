@@ -32,12 +32,16 @@ private:
         return (int)(size * hash);
     }
 public:
+	static const int ERROR_GET_VALUE = 2;
+	static const int ERROR_INCREMENT = 3;
+	static const int ERROR_EMPTY_TABLE = 4;
 	class iterator
 	{
 		List<K, V> **currentHead;
 		List<K, V> **endHead;
 		List<K, V> *currentItem;
 	public:
+		
 		iterator(List<K, V> **head, List<K, V> **end)
 		{
 			currentHead = head;
@@ -47,9 +51,19 @@ public:
 				currentHead++;
 			}
 			currentItem = *currentHead;
+			if (currentHead == endHead)
+			{
+				throw HashTable::ERROR_EMPTY_TABLE;
+			}
 		}
+		iterator()
+		{}
 		iterator& operator++()
 		{
+			if (currentHead == endHead)
+			{
+				throw ERROR_INCREMENT;
+			}
 			if (currentItem->next != nullptr)
 			{
 				currentItem = currentItem->next;
@@ -67,14 +81,33 @@ public:
 		}
 		bool operator!=(const iterator& rhs) const { return currentHead != rhs.currentHead; }
 		bool operator==(const iterator& rhs) const { return currentHead == rhs.currentHead; }
-		K operator*() 
+		V* operator*() 
 		{ 
-			return currentItem->key;
+			if (currentHead == endHead)
+			{
+				throw ERROR_GET_VALUE;
+			}
+			if (currentHead == endHead || currentItem == nullptr)
+			{
+				throw HashTable::ERROR_GET_VALUE;
+				return nullptr;
+			}
+			return &currentItem->value;
 		}
 	};
     HashTable(int count)
     {
 		int size = (int)(count / ALPHA);
+
+		int curSize = 2;
+		int prevSize = 2;
+		while (curSize < size)
+		{
+			prevSize = curSize;
+			curSize *= 2;
+		}
+		size = prevSize;
+
 		data = new List<K, V>*[size];
         for (int i = 0; i < size; ++i) {
             data[i] = nullptr;
@@ -96,16 +129,6 @@ public:
     };
     int getCount()
     {
-        //int count = 0;
-        //for (int i = 0; i < size; ++i) {
-        //    if (data[i] != nullptr) {
-        //        List<K> *head = data[i];
-        //        while (head != nullptr) {
-        //            count++;
-        //            head = head->next;
-        //        }
-        //    }
-        //}
         return count;
     };
     int getFree()
@@ -159,13 +182,13 @@ public:
         }
         else {
             List<K, V> *item = data[i];
-            do {
-                if (item->key == key) {
-                    return false;
-                }
-                item = item->next == nullptr ? item : item->next;
-				countIteration++;
-			} while (item->next != nullptr);
+			while (item != nullptr)
+			{
+				if (item->key == key) {
+					return false;
+				}
+				item = item->next;
+			}
 			item = new List<K, V>(key, value);
 			item->next = data[i];
 			data[i] = item;
@@ -227,7 +250,7 @@ public:
 				List<K, V> *list = data[i];
 				while (list != nullptr)
 				{
-					std::cout << list->key << " -> ";
+					std::cout << "(" << list->key << ", " << list->value << ") -> ";
 					list = list->next;
 				}
 				std::cout << "null" << std::endl;
