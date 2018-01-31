@@ -26,9 +26,9 @@ private:
     int countIteration;
     int hash(K key)
     {
-		int intKey = int(key * 100) + 1000000;
-        float hash = intKey * 0.6180339887f;
-        hash = hash - (int)hash;
+		long long intKey = int(key * 10000) + 1000000000;
+        double hash = intKey * 0.6180339887;
+        hash = hash - (long long)hash;
         return (int)(size * hash);
     }
 public:
@@ -174,16 +174,18 @@ public:
     bool insert(K key, V value)
     {
         int i = hash(key);
-		countIteration = 1;
         if (data[i] == nullptr) {
+			countIteration = 1;
             data[i] = new List<K, V>(key, value);
 			count++;
 			return true;
         }
         else {
             List<K, V> *item = data[i];
+			countIteration = 0;
 			while (item != nullptr)
 			{
+				countIteration++;
 				if (item->key == key) {
 					return false;
 				}

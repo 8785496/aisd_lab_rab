@@ -5,11 +5,13 @@
 
 using namespace std;
 
-long long keyGen()
+float keyGen()
 {
 	long long temp = rand();
 	temp = temp << 32;
-	return  temp | rand();
+	temp = temp | rand();
+	temp = temp % 100000000;
+	return (float)(temp / 10000.0);
 }
 
 int main()
@@ -24,17 +26,18 @@ int main()
 	HashTable<float, int> table(n);
 	m = table.getSize();
 	k = (int)(m * alpha);
-	long long *data = new long long[k];
-	//for (int i = 0; i < k; i++)
-	//{
-	//	data[i] = keyGen();
-	//	cout << data[i] << endl;
-	//}
+	float *data = new float[k];
+	for (int i = 0; i < k; i++)
+	{
+		data[i] = keyGen();
+		table.insert(data[i], 1);
+	}
 
 	int countRemove = 0;
 	int countInsert = 0;
 	int countSearch = 0;
 	int value;
+
 	for (int i = 0; i < k / 2; i++)
 	{
 		if (i % 10 == 0) // промахи
@@ -48,7 +51,7 @@ int main()
 			table.search(keyGen(), value);
 			countSearch += table.getCountIteration();
 		}
-		else
+		else // попадания
 		{
 			int index = rand() % k;
 			float key = keyGen() / 10000;
@@ -65,11 +68,11 @@ int main()
 			countSearch += table.getCountIteration();
 		}
 	}
-
-	cout << "Alpha = " << table.getCount() / table.getSize() << endl;
-	cout << "Среднее количество операций на удаление: " << countRemove / (k / 2) << endl;
-	cout << "Среднее количество операций на вставку: " << countInsert / (k / 2) << endl;
-	cout << "Среднее количество операций на поиск: " << countSearch / (k / 2) << endl;
+	alpha = 1.0f * table.getCount() / table.getSize();
+	cout << "Alpha = " << alpha << endl;
+	cout << "Среднее количество операций на удаление: " << 1.0f * countRemove / (k / 2) << endl;
+	cout << "Среднее количество операций на вставку: " << 1.0f * countInsert / (k / 2) << endl;
+	cout << "Среднее количество операций на поиск: " << 1.0f * countSearch / (k / 2) << endl;
 
 	system("pause");
 }
