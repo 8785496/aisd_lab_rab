@@ -1,6 +1,7 @@
 // test_table.cpp
 #include <iostream>
 #include <string>
+#include <time.h>
 #include "HashTable.h"
 
 using namespace std;
@@ -8,7 +9,12 @@ using namespace std;
 float keyGen()
 {
 	long long temp = rand();
-	temp = temp << 32;
+	long long r = rand();
+	temp = temp << 48;
+	r = rand(); r = r << 32;
+	temp = temp | r;
+	r = rand(); r = r << 16;
+	temp = temp | r;
 	temp = temp | rand();
 	temp = temp % 100000000;
 	return (float)(temp / 10000.0);
@@ -16,9 +22,11 @@ float keyGen()
 
 int main()
 {
+	srand(time(0));
 	setlocale(LC_CTYPE, "ru-RU");
 	int n, m, k;
 	float alpha;
+	cout << "Тестирование количества операций" << endl;
 	cout << "Введите количество элементов (n): ";
 	cin >> n;
 	cout << "Введите коэффициент заполнения (alpha): ";

@@ -26,11 +26,12 @@ private:
     int countIteration;
     int hash(K key)
     {
-		long long intKey = int(key * 10000) + 1000000000;
+		long long intKey = int(key * 100) + 10000000;
         double hash = intKey * 0.6180339887;
         hash = hash - (long long)hash;
         return (int)(size * hash);
     }
+
 public:
 	static const int ERROR_GET_VALUE = 2;
 	static const int ERROR_INCREMENT = 3;
@@ -263,26 +264,39 @@ public:
 			}
 		}
 	}
-	float getKsiSqrAvg()
+	float keyGen()
 	{
-		float *ksi_sqr = new float[size];
-		for (int i = 0; i < size; i++)
+		long long temp = rand();
+		long long r = rand();
+		temp = temp << 48;
+		r = rand(); r = r << 32;
+		temp = temp | r;
+		r = rand(); r = r << 16;
+		temp = temp | r;
+		temp = temp | rand();
+		temp = temp % 100000000;
+		return (float)(temp / 10000.0);
+	}
+	float getKsiSqrAvg(int n, float alpha)
+	{
+		size = n;
+		int *lens = new int[n];
+		for (int i = 0; i < n; i++)
 		{
-			int len = 0;
-			auto node = data[i];
-			while (node != 0)
-			{
-				len++;
-				node = node->next;
-			}
-			ksi_sqr[i] = ((float)size / count) * (len - count / size);
+			lens[i] = 0;
 		}
-		float ksi_sqr_sum = 0.0;
-		for (int i = 0; i < size; i++)
+		for (int i = 0; i < n * alpha; i++)
 		{
-			ksi_sqr_sum += ksi_sqr[i];
+			int k = hash(keyGen());
+			lens[k]++;
 		}
-		return ksi_sqr_sum / size;
+		double ksi_sqr_sum = 0.0;
+		for (int i = 0; i < n; i++)
+		{
+			ksi_sqr_sum += (double)((alpha - lens[i]) * (alpha - lens[i]));
+		}
+		size = 0;
+		return (float)(ksi_sqr_sum / alpha);
 	}
 };
 

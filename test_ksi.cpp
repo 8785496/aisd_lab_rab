@@ -1,6 +1,8 @@
 // test_ksi.cpp
 #include <iostream>
 #include <string>
+#include <cmath>
+#include <time.h>
 #include "HashTable.h"
 
 using namespace std;
@@ -16,6 +18,8 @@ float keyGen()
 
 int main()
 {
+	
+	srand(time(0));
 	setlocale(LC_CTYPE, "ru-RU");
 	int n, m, k;
 	float alpha;
@@ -34,8 +38,9 @@ int main()
 		table.insert(data[i], 1);
 	}
 	
-	cout << "Средний кси квадрат: " << table.getKsiSqrAvg() << endl;
-	
+	cout << "m - sqrt(m): " << n - sqrt(n) << endl;
+	cout << "Средний кси квадрат: " << table.getKsiSqrAvg(n, alpha) << endl;
+	cout << "m + sqrt(m): " << n + sqrt(n) << endl;
 
 	system("pause");
 }
